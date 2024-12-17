@@ -163,8 +163,16 @@
                                                 <button wire:click="cancelEvent({{ $index }}, {{ 0 }})" class="text-red-500 hover:underline">Reagendar</button>
                                             @endif
                                             @if($event->description === "Sesiones Masaje" || $event->description === "Manicure" || $event->description === "Pedicure" || $event->description === "Reiki")
-                                                <button wire:click="getPayService('{{$event->description}}')"  class="text-blue-500 hover:underline">Cobrar</button>
-                                            @endif
+                                                    @if(\App\Models\EventSale::where('event_id', $event->id)->first())
+                                                        <span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
+                                                            <span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
+                                                            Pagado
+                                                        </span>
+                                                    @else
+                                                        <button wire:click="getPayService('{{$event->description}}', '{{$event->id}}')"  class="text-blue-500 hover:underline">Cobrar</button>
+                                                    @endif
+                                                @endif
+                                                <button wire:model="objectEvent" wire:click="eventIdDelete({{ $event }})" class="text-red-500 hover:underline">Eliminar</button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -191,6 +199,12 @@
                 <div class="bg-white p-5 rounded-lg shadow-lg">
                     <h3 class="text-lg font-semibold">Ingrea el monto:</h3>
                     <input wire:model="amountPay" type="text">
+                    <label for="countries" class="block mb-2 text-sm font-medium text-gray-900">Tipo de pago</label>
+                    <select wire:model="tipePay" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option selected>Selecciona tipo</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
                     <button wire:click="processPay" class="mt-3 text-blue-700">Cobrar</button>
                     <button wire:click="cancelPay"  class="mt-3 text-gray-700">Cancelar</button>
                 </div>
@@ -228,6 +242,23 @@
 </script>
 <script>
     document.addEventListener('livewire:init', () => {
+        Livewire.on('deleteEvent', (event) => {
+
+            Swal.fire({
+                title: "¿Estas seguro de eliminar la cita?",
+                text: "Este proceso es irreversible",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, eliminar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('eventDeleteFunction');
+                }
+            });
+
+        });
         Livewire.on('errorDateTime', (event) => {
 
             Swal.fire({

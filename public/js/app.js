@@ -19,13 +19,15 @@ $(document).ready(function(){
             return;
         }
 
+        $('#modal-reserve').removeClass('hidden');
+
         var formData = new FormData();
         formData.append('name', name);
         formData.append('email', email);
         formData.append('phone', phone);
 
         $.ajax({
-            url: 'https://holos-spa.com/api/initial-reserve',
+            url: 'api/initial-reserve',
             type: 'POST',
             data: formData,
             processData: false,

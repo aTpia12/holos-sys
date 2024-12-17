@@ -44,9 +44,9 @@ class InitialReserveController extends Controller
             Mail::to('mcamacho@echopoint.com.mx')->send(new NotificationAdminNewUserMailable($user));
             Mail::to('recepcion@holos-spa.com')->send(new NotificationAdminNewUserMailable($user));
 
-            $this->whatsappService->send('525540052578', $user);
+            /*$this->whatsappService->send('525540052578', $user);
             $this->whatsappService->send('522285211115', $user);
-            $this->whatsappService->send('525514520548', $user);
+            $this->whatsappService->send('525514520548', $user);*/
 
             return response()->json([
                 'message' => 'Tu reservación se ha registrado con éxito.',

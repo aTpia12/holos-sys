@@ -12,6 +12,7 @@ use App\Models\Sale as SaleModel;
 use App\Models\User as UserModel;
 use App\Mail\TicketMailable;
 use Illuminate\Support\Facades\Mail;
+use App\Models\EventSale;
 
 class Events extends Component
 {
@@ -36,6 +37,20 @@ class Events extends Component
     public $getPay = false;
     public $servicePay = '';
     public $amountPay;
+    public $tipePay;
+    public $serviceId;
+    public $objectEvent;
+
+    public function eventIdDelete(Event $eventId)
+    {
+        $this->objectEvent = $eventId;
+        $this->dispatch('deleteEvent');
+    }
+    #[On('eventDeleteFunction')]
+    public function deleteEvent()
+    {
+        $this->objectEvent->delete();
+    }
 
     public function processPay()
     {
@@ -45,7 +60,7 @@ class Events extends Component
             'total' => $this->amountPay,
             'subtotal' => $this->amountPay,
             'iva' => '0.00',
-            'type' => 'efectivo',
+            'type' => $this->tipePay !== null ? $this->tipePay : 'efectivo',
             'cart' => json_encode([
                 ['id' => 701,
                 'name' => $this->servicePay,
@@ -53,6 +68,11 @@ class Events extends Component
                 'price' => $this->amountPay,
                 'quantity' => 1]
                 ]),
+        ]);
+
+        EventSale::create([
+            'event_id' => $this->serviceId,
+            'sale_id' => $saleCart->id,
         ]);
 
         $ticketData = [
@@ -78,9 +98,10 @@ class Events extends Component
         $this->getPay = false;
     }
 
-    public function getPayService($servicePay)
+    public function getPayService($servicePay, $serviceId)
     {
         $this->servicePay = $servicePay;
+        $this->serviceId = $serviceId;
         $this->getPay = true;
     }
 
