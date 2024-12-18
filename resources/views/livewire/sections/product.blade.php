@@ -7,7 +7,7 @@
         <div class="relative overflow-x-auto">
             <label for="table-search" class="sr-only">Buscar</label>
             <div class="relative mt-1">
-            
+
                 <input wire:model="search" wire:keyup="searchProducts($event.target.value)" type="text" id="table-search" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" placeholder="Buscar productos">
             </div><br>
         <table class="w-full text-sm text-left rtl:text-right">
@@ -96,14 +96,18 @@
                         <div class="col-span-2 sm:col-span-1">
                             <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categoria</label>
                             <select wire:model="category_id" id="category" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5">
-                                <option selected="">Categoría</option>
-                                <option value="1">Masajes</option>
-                                <option value="2">Uñas</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-span-2 sm:col-span-1">
                             <label for="barcode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Código de Barras</label>
                             <input wire:model="code" type="text" name="barcode" id="barcode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="123456789">
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <label for="cant" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad</label>
+                            <input wire:model="cant" type="number" min="1" name="cant" id="cant" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="1">
                         </div>
                         <div class="col-span-2">
                             <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descripción</label>

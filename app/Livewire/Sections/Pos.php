@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Sections;
 
+use Illuminate\Support\Str;
 use Livewire\Component;
 use App\Models\Product as ProductModel;
 use App\Models\User as UserModel;
@@ -23,11 +24,16 @@ class Pos extends Component
     public $userSearch = '';
     public $users = [];
     public $selectedUser = null;
-    
+
     public $newUserName = '';
     public $newUserPhone = '';
     public $newUserEmail = '';
     public $showNewUserFields = false;
+    public $getNewUser = false;
+    public $newName = '';
+    public $newPhone = '';
+    public $newEmail = '';
+    public $textNewUserName;
 
     public function searchProducts($value)
     {
@@ -54,7 +60,7 @@ class Pos extends Component
     public function addToCart($productId)
     {
         $product = ProductModel::find($productId);
-        
+
         if (!$product || $product->cant <= 0) {
             $this->dispatch('errorStock', 'Este producto no está disponible en stock.');
             return;
@@ -111,20 +117,21 @@ class Pos extends Component
         // Calcular total
         $this->total = $this->subtotal + $this->iva;
     }
-    
+
     public function searchUsers($value)
     {
         if ($value) {
             // Limpiar el valor para evitar problemas de codificación
             $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-    
+
             $this->users = UserModel::where('name', 'like', '%' . $value . '%')->get();
-            
+
             // Si no se encuentran usuarios, agregar opción para crear uno nuevo
             if ($this->users->isEmpty()) {
+                $this->textNewUserName = $value;
                 $this->users = [
                     (object)[
-                        'id' => 'new', 
+                        'id' => 'new',
                         'name' => 'Agregar nuevo usuario: ' . $value,
                     ]
                 ];
@@ -134,27 +141,27 @@ class Pos extends Component
         }
     }
 
-    
+
     public function createUser()
     {
-    
+
         // Crear el nuevo usuario
         $user = UserModel::create([
             'name' => $this->newUserName,
             'phone' => $this->newUserPhone,
             'email' => $this->newUserEmail,
         ]);
-    
+
         // Almacenar el ID del nuevo usuario
         $this->selectedUser = $user->id;
-    
+
         // Limpiar campos después de crear
         $this->resetNewUserFields();
-        
+
         // Limpiar la lista de usuarios después de crear uno
         $this->users = [];
     }
-    
+
     public function resetNewUserFields()
     {
         $this->newUserName = '';
@@ -174,14 +181,33 @@ class Pos extends Component
     public function selectUser($userId)
     {
         if($userId === 0){
-            $showNewUserFields = true;
-            $this->selectedUser = $userId; // Almacenar el ID del usuario seleccionado
-            $this->users = []; // 
+            $this->newName = $this->textNewUserName;
+            $this->getNewUser = true;//
         }else{
             $this->selectedUser = $userId; // Almacenar el ID del usuario seleccionado
-            $this->users = []; // Limpiar la lista de usuarios después de seleccionar uno    
+            $this->users = []; // Limpiar la lista de usuarios después de seleccionar uno
         }
-        
+
+    }
+
+    public function cancelNewUserAdd()
+    {
+        $this->getNewUser = false;
+        $this->users = [];
+    }
+
+    public function newUserAdd()
+    {
+        $addUser = UserModel::create([
+            'name' => $this->newName,
+            'phone' => $this->newPhone,
+            'email' => $this->newEmail,
+            'password' => bcrypt(Str::random(8)),
+        ]);
+
+        $this->selectedUser = $addUser->id;
+        $this->getNewUser = false;
+        $this->users = [];
     }
 
     public function processSale()
@@ -205,9 +231,9 @@ class Pos extends Component
             'email' => UserModel::find($this->selectedUser)->email,
             'name' => UserModel::find($this->selectedUser)->name,
         ];
-        
+
         session(['ticketData' => $ticketData]);
-        
+
         $sendEmail = Mail::to(UserModel::find($this->selectedUser)->email)->send(new TicketMailable($ticketData));
 
         foreach ($this->cart as $item) {

@@ -4,6 +4,7 @@ namespace App\Livewire\Sections;
 
 use Livewire\Component;
 use App\Models\Product as ModelsProduct;
+use App\Models\Category as ModelsCategory;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 class Product extends Component
@@ -12,12 +13,12 @@ class Product extends Component
 
     public $name;
     public $slug;
-    public $category_id;
+    public $category_id = 1;
     public $price;
     public $description;
     public $image;
     public $code;
-    
+
     public $nameUpdate;
     public $slugUpdate;
     public $category_idUpdate;
@@ -26,7 +27,9 @@ class Product extends Component
     public $imageUpdate;
     public $codeUpdate;
     public $search = '';
-    
+    public $categories;
+    public $cant;
+
     public function searchProducts($value)
     {
         // Filtrar categorías según la búsqueda
@@ -53,12 +56,13 @@ class Product extends Component
 
 
         ModelsProduct::create([
-            'category_id' => "1",
+            'category_id' => $this->category_id,
             'name' => $this->name,
+            'cant' => $this->cant,
             'slug' => $this->name,
             'price' => $this->price,
             'description' => $this->description,
-            'image' => "hola",
+            'image' => $this->image,
             'code' => $this->code,
         ]);
 
@@ -68,8 +72,9 @@ class Product extends Component
     public function render()
     {
         $this->products = ModelsProduct::where('name', 'like', '%' . $this->search . '%')
-                ->paginate(10); 
+                ->paginate(10);
+        $this->categories = ModelsCategory::all();
 
-        return view('livewire.sections.product', ['products' => $this->products]);
+        return view('livewire.sections.product', ['products' => $this->products, 'categories' => $this->categories]);
     }
 }

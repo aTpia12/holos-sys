@@ -93,25 +93,28 @@
                             </svg>
                         </button>
                         <!-- Dropdown menu -->
-                        <div id="lastDaysdropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">ayer</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Hoy</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Ultimos 7 dias</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Ultimos 30 dias</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Ultimos 90 dias</a>
-                                </li>
-                            </ul>
-                        </div>
+                        <form method="GET" action="{{ route('dashboard') }}">
+                            <div id="lastDaysdropdown" class="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                    <li>
+                                        <button type="submit" name="range" value="yesterday" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Ayer</button>
+                                    </li>
+                                    <li>
+                                        <button type="submit" name="range" value="today" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Hoy</button>
+                                    </li>
+                                    <li>
+                                        <button type="submit" name="range" value="last_7_days" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Últimos 7 días</button>
+                                    </li>
+                                    <li>
+                                        <button type="submit" name="range" value="last_30_days" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Últimos 30 días</button>
+                                    </li>
+                                    <li>
+                                        <button type="submit" name="range" value="last_90_days" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Últimos 90 días</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
+
                         <a
                             href="#"
                             class="uppercase text-sm font-semibold inline-flex items-center rounded-lg text-blue-600 hover:text-blue-700 dark:hover:text-blue-500  hover:bg-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 px-3 py-2">
@@ -197,15 +200,56 @@
         </div>
     </div>
     @php
-    $dailyTotals = [];
+        $dailyTotals = [];
+        $range = request('range');
 
-        // Obtener los totales de ventas de los últimos 7 días
-        for ($i = 6; $i >= 0; $i--) {
-            $date = \Carbon\Carbon::now()->subDays($i)->format('Y-m-d');
-            $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total'); // Sumar los totales del día
-            $dailyTotals[] = $total; // Agregar el total al array
+        switch ($range) {
+            case 'yesterday':
+                $date = \Carbon\Carbon::now()->subDay()->format('Y-m-d');
+                $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                $dailyTotals[] = $total;
+                break;
+
+            case 'today':
+                $date = \Carbon\Carbon::now()->format('Y-m-d');
+                $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                $dailyTotals[] = $total;
+                break;
+
+            case 'last_7_days':
+                for ($i = 6; $i >= 0; $i--) {
+                    $date = \Carbon\Carbon::now()->subDays($i)->format('Y-m-d');
+                    $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                    $dailyTotals[] = $total;
+                }
+                break;
+
+            case 'last_30_days':
+                for ($i = 29; $i >= 0; $i--) {
+                    $date = \Carbon\Carbon::now()->subDays($i)->format('Y-m-d');
+                    $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                    $dailyTotals[] = $total;
+                }
+                break;
+
+            case 'last_90_days':
+                for ($i = 89; $i >= 0; $i--) {
+                    $date = \Carbon\Carbon::now()->subDays($i)->format('Y-m-d');
+                    $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                    $dailyTotals[] = $total;
+                }
+                break;
+
+            default:
+                // Si no se selecciona ningún rango, puedes optar por mostrar los últimos 7 días
+                for ($i = 6; $i >= 0; $i--) {
+                    $date = \Carbon\Carbon::now()->subDays($i)->format('Y-m-d');
+                    $total = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                    $dailyTotals[] = $total;
+                }
         }
     @endphp
+
 </x-app-layout>
 <script>
         const dailyTotals = @json($dailyTotals);

@@ -79,38 +79,53 @@
                     <span class="text-lg font-bold text-gray-800">Total:</span>
                     <span class="text-lg font-bold text-blue-600">${{ number_format($total, 2) }}</span>
                 </div>
-            
+
             </div>
 
-            
+
             <!-- Campo para buscar usuarios -->
             <div class="relative w-full max-w-md mt-5">
-                <input type="text" 
-                       wire:model="userSearch" 
-                       wire:keyup="searchUsers($event.target.value)" 
+                <input type="text"
+                       wire:model="userSearch"
+                       wire:keyup="searchUsers($event.target.value)"
                        placeholder="Buscar cliente..."
                        class="w-full bg-gray-50 border border-gray-300 rounded-lg py-2 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" />
-                
+
                 <!-- Lista de usuarios encontrados -->
                 @if(!empty($users))
                     <ul class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg">
                         @foreach($users as $user)
-                            <li wire:click="{{ $user->id === 'new' ? 'selectUser(0)' : 'selectUser(' . $user->id . ')' }}" 
+                            <li wire:click="{{ $user->id === 'new' ? 'selectUser(0)' : 'selectUser(' . $user->id . ')' }}"
                                 class="py-2 px-4 cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                                
+
                                 {{ $user->name }}
                             </li>
                         @endforeach
                     </ul>
-                
-            
+
+
                 @endif
-            
+                @if($getNewUser)
+                    <div class="fixed inset-0 flex items-center justify-center z-50">
+                        <div class="bg-white p-5 rounded-lg shadow-lg">
+                            <h3 class="text-lg font-semibold">Nuevo usuario</h3>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Nombre</label>
+                            <input wire:model="newName" name="name" type="text">
+                            <label for="phone" class="block mb-2 text-sm font-medium text-gray-900">Telefono</label>
+                            <input wire:model="newPhone" name="phone" type="text">
+                            <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
+                            <input wire:model="newEmail" name="email" type="text">
+                            <br>
+                            <button wire:click="newUserAdd" class="mt-3 text-blue-700">Agregar</button>
+                            <button wire:click="cancelNewUserAdd"  class="mt-3 text-gray-700">Cancelar</button>
+                        </div>
+                    </div>
+                @endif
                 <!-- Mostrar el usuario seleccionado -->
                 @if($selectedUser)
                     <h3 class="mt-4 text-lg font-semibold">Cliente Seleccionado: <span class="font-normal">{{ optional(\App\Models\User::find($selectedUser))->name }}</span></h3>
                 @endif
-            
+
             </div>
 
 
@@ -133,13 +148,13 @@
     @else
         <p>No hay productos en el carrito.</p>
     @endif
-    
+
 
                 <button id="pos-user-modal" data-modal-target="{{$showNewUserFields ?? 'crud-modal-pos-user'}}" data-modal-toggle="{{$showNewUserFields ?? 'crud-modal-pos-user'}}" class="{{$showNewUserFields ? 'block' : 'hidden'}} text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                   Toggle modal
                 </button>
- 
-                
+
+
 <!-- Main modal -->
 <div id="crud-modal-pos-user" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-md max-h-full">
@@ -180,7 +195,7 @@
                     </div>
                     <div class="col-span-2">
                         <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Description</label>
-                        <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write product description here"></textarea>                    
+                        <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write product description here"></textarea>
                     </div>
                 </div>
                 <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -190,7 +205,7 @@
             </form>
         </div>
     </div>
-</div> 
+</div>
 
 </div>
 <script>
